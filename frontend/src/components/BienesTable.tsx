@@ -1,16 +1,16 @@
-import {useEffect, useState} from 'react';
-import {BienesService, type BienPatrimonial} from '../services/api';
-import {BienModal} from './BienModal';
-import {Edit2, PackageCheck, Plus, Search, Trash2} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BienesService, type BienPatrimonial } from '../services/api';
+import { BienModal } from './BienModal';
+import { Edit2, PackageCheck, Plus, Search, Trash2 } from 'lucide-react';
 
 export function BienesTable() {
     const [bienes, setBienes] = useState<BienPatrimonial[]>([]);
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(true);
 
-    // Estados de Paginación
+    // Estados de Paginación (Default en 10)
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(20);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     // Estados del Modal
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,7 +20,6 @@ export function BienesTable() {
         cargarBienes();
     }, []);
 
-    // Resetea a la página 1 cuando el usuario busca algo
     useEffect(() => {
         setCurrentPage(1);
     }, [search]);
@@ -28,10 +27,10 @@ export function BienesTable() {
     const cargarBienes = () => {
         setLoading(true);
         BienesService.getAll()
-            .then(data => {
+            .then((data) => {
                 setBienes(data || []);
             })
-            .catch(err => console.error("Error cargando bienes:", err))
+            .catch((err) => console.error("Error cargando bienes:", err))
             .finally(() => setLoading(false));
     };
 
@@ -70,13 +69,10 @@ export function BienesTable() {
     const totalPages = Math.ceil(bienesFiltrados.length / itemsPerPage);
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-
-    // IMPORTANTE: Este es el subarray recortado que DEBE recorrer la tabla (máximo 20/50/100 elementos)
     const bienesPaginados = bienesFiltrados.slice(indexOfFirstItem, indexOfLastItem);
 
-    // Componente reutilizable para los botones de control de páginas
     const Paginador = () => (
-        <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-600 w-full">
+        <div className="flex flex-wrap items-center justify-between gap-4 text-xs font-medium text-slate-600 w-full">
             <div className="flex items-center gap-2">
                 <span>Mostrar:</span>
                 <select
@@ -85,7 +81,7 @@ export function BienesTable() {
                         setItemsPerPage(Number(e.target.value));
                         setCurrentPage(1);
                     }}
-                    className="bg-white border border-slate-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="bg-white border border-slate-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                     <option value={10}>10 por pág.</option>
                     <option value={20}>20 por pág.</option>
@@ -94,15 +90,15 @@ export function BienesTable() {
                 </select>
             </div>
 
-            <div className="font-medium text-slate-700">
-                Mostrando {bienesFiltrados.length > 0 ? indexOfFirstItem + 1 : 0} - {Math.min(indexOfLastItem, bienesFiltrados.length)} de {bienesFiltrados.length}
+            <div className="text-slate-500">
+                Mostrando <span className="font-semibold text-slate-700">{bienesFiltrados.length > 0 ? indexOfFirstItem + 1 : 0}</span> - <span className="font-semibold text-slate-700">{Math.min(indexOfLastItem, bienesFiltrados.length)}</span> de <span className="font-semibold text-slate-700">{bienesFiltrados.length}</span>
             </div>
 
             <div className="flex items-center gap-2">
                 <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-xs"
                 >
                     &larr; Anterior
                 </button>
@@ -112,7 +108,7 @@ export function BienesTable() {
                 <button
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage >= totalPages || totalPages === 0}
-                    className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shadow-xs"
                 >
                     Siguiente &rarr;
                 </button>
@@ -121,113 +117,112 @@ export function BienesTable() {
     );
 
     return (
-        <div className="p-8 space-y-6">
+        <div className="p-8 space-y-6 max-w-[1600px] mx-auto">
+            {/* Header del módulo */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-slate-900">Bienes Patrimoniales</h2>
+                    <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">Bienes Patrimoniales</h2>
                     <p className="text-slate-500 text-sm">Control e inventario general de activos</p>
                 </div>
                 <button
                     onClick={handleCrearNuevo}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-colors"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 font-medium transition-all shadow-sm active:scale-95 cursor-pointer"
                 >
-                    <Plus className="w-4 h-4"/>
+                    <Plus className="w-4 h-4" />
                     Nuevo Bien
                 </button>
             </div>
 
-            <div
-                className="flex justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+            {/* Buscador */}
+            <div className="flex justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-xs border border-slate-200/80">
                 <div className="relative flex-1 max-w-md">
-                    <Search className="w-4 h-4 absolute left-3 top-3.5 text-slate-400"/>
+                    <Search className="w-4 h-4 absolute left-3 top-3.5 text-slate-400" />
                     <input
                         type="text"
                         placeholder="Buscar por N° inventario, descripción o marca..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-9 pr-4 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
                     />
                 </div>
-                <div className="text-sm font-semibold text-slate-600 flex items-center gap-2">
-                    <PackageCheck className="w-4 h-4 text-blue-600"/>
+                <div className="text-sm font-semibold text-slate-600 flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200/60">
+                    <PackageCheck className="w-4 h-4 text-indigo-600" />
                     Total: {bienesFiltrados.length}
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            {/* Contenedor de Tabla con Scroll Interno y Header Sticky */}
+            <div className="bg-white rounded-xl shadow-xs border border-slate-200/80 overflow-hidden">
                 {loading ? (
-                    <div className="p-8 text-center text-slate-500">Cargando bienes...</div>
+                    <div className="p-12 text-center text-slate-500 font-medium">Cargando bienes patrimoniales...</div>
                 ) : (
                     <div>
-                        {/* BARRA SUPERIOR DE PAGINACIÓN */}
-                        <div className="p-4 bg-slate-50 border-b border-slate-200">
-                            <Paginador/>
+                        {/* Se agrega min-h-[520px] para mantener constante la altura de 10 filas */}
+                        <div className="max-h-[calc(100vh-340px)] min-h-[520px] overflow-y-auto">
+                            <table className="w-full text-left text-sm border-collapse">
+                                <thead className="sticky top-0 bg-slate-100/90 backdrop-blur-xs border-b border-slate-200 text-slate-600 font-semibold z-10 shadow-xs">
+                                    <tr>
+                                        <th className="p-4 uppercase text-[11px] tracking-wider text-slate-500">N° Inventario</th>
+                                        <th className="p-4 uppercase text-[11px] tracking-wider text-slate-500">Descripción</th>
+                                        <th className="p-4 uppercase text-[11px] tracking-wider text-slate-500">Marca</th>
+                                        <th className="p-4 uppercase text-[11px] tracking-wider text-slate-500">Estado</th>
+                                        <th className="p-4 uppercase text-[11px] tracking-wider text-slate-500 text-right">Importe Total</th>
+                                        <th className="p-4 uppercase text-[11px] tracking-wider text-slate-500 text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 bg-white">
+                                    {bienesPaginados.map((b) => (
+                                        <tr key={b.numeroInventario} className="h-[52px] hover:bg-slate-50/80 transition-colors">
+                                            <td className="p-4 font-mono font-bold text-indigo-600">{b.numeroInventario}</td>
+                                            <td className="p-4 font-medium text-slate-800">{b.descripcion}</td>
+                                            <td className="p-4 text-slate-500">{b.marca || '-'}</td>
+                                            <td className="p-4">
+                                                <span
+                                                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide ${
+                                                        b.estado === 'BUENO'
+                                                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                                                            : b.estado === 'REGULAR'
+                                                            ? 'bg-amber-50 text-amber-700 border border-amber-200/60'
+                                                            : 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                                                    }`}
+                                                >
+                                                    {b.estado}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-right font-semibold text-slate-700 font-mono">
+                                                ${b.importeTotal ? b.importeTotal.toLocaleString() : '0'}
+                                            </td>
+                                            <td className="p-4">
+                                                <div className="flex justify-center gap-1">
+                                                    <button
+                                                        onClick={() => handleEditar(b)}
+                                                        className="p-1.5 hover:bg-indigo-50 text-indigo-600 rounded-lg transition-colors cursor-pointer"
+                                                        title="Editar"
+                                                    >
+                                                        <Edit2 className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleEliminar(b.numeroInventario)}
+                                                        className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors cursor-pointer"
+                                                        title="Eliminar"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
 
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-100 border-b border-slate-200 text-slate-600 font-semibold">
-                            <tr>
-                                <th className="p-4">N° Inventario</th>
-                                <th className="p-4">Descripción</th>
-                                <th className="p-4">Marca</th>
-                                <th className="p-4">Estado</th>
-                                <th className="p-4 text-right">Importe Total</th>
-                                <th className="p-4 text-center">Acciones</th>
-                            </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                            {/* ATENCIÓN AQUÍ: Se mapea bienesPaginados en lugar de bienesFiltrados */}
-                            {bienesPaginados.map((b) => (
-                                <tr key={b.numeroInventario} className="hover:bg-slate-50/50">
-                                    <td className="p-4 font-mono font-medium text-blue-600">{b.numeroInventario}</td>
-                                    <td className="p-4 font-medium text-slate-800">{b.descripcion}</td>
-                                    <td className="p-4 text-slate-500">{b.marca || '-'}</td>
-                                    <td className="p-4">
-                                        <span
-                                            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                                                b.estado === 'BUENO'
-                                                    ? 'bg-emerald-100 text-emerald-700'
-                                                    : b.estado === 'REGULAR'
-                                                        ? 'bg-amber-100 text-amber-700'
-                                                        : 'bg-slate-100 text-slate-700'
-                                            }`}
-                                        >
-                                          {b.estado}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-right font-medium text-slate-700">
-                                        ${b.importeTotal ? b.importeTotal.toLocaleString() : '0'}
-                                    </td>
-                                    <td className="p-4">
-                                        <div className="flex justify-center gap-2">
-                                            <button
-                                                onClick={() => handleEditar(b)}
-                                                className="p-1.5 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
-                                            >
-                                                <Edit2 className="w-4 h-4"/>
-                                            </button>
-                                            <button
-                                                onClick={() => handleEliminar(b.numeroInventario)}
-                                                className="p-1.5 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4"/>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-
-                        {/* BARRA INFERIOR DE PAGINACIÓN */}
-                        <div className="p-4 bg-slate-50 border-t border-slate-200">
-                            <Paginador/>
+                        <div className="p-3.5 bg-slate-50/80 border-t border-slate-200/80">
+                            <Paginador />
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Componente Modal */}
             <BienModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}

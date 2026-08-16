@@ -45,6 +45,24 @@ export interface Vehiculo {
     modeloAnio?: number;
 }
 
+export interface Programa {
+    id?: number | string;
+    codigo: string;
+    nombre?: string;
+    descripcion?: string;
+}
+
+export interface Categoria {
+    id?: number | string;
+    numero: number;
+    descripcion?: string;
+}
+
+export interface OpcionesPersonalDTO {
+    programas: Programa[] | string[];
+    categorias: Categoria[] | number[];
+}
+
 // --- SERVICIOS DE LA API ---
 
 export const BienesService = {
@@ -57,6 +75,7 @@ export const BienesService = {
 export const PersonalService = {
     getAll: () => api.get<Personal[]>('/personal').then(res => res.data),
     create: (p: Personal) => api.post<Personal>('/personal', p).then(res => res.data),
+    update: (cuil: string, p: Personal) => api.put<Personal>(`/personal/${cuil}`, p).then(res => res.data),
     delete: (cuil: string) => api.delete(`/personal/${cuil}`),
 };
 
@@ -64,4 +83,15 @@ export const VehiculosService = {
     getAll: () => api.get<Vehiculo[]>('/vehiculos').then(res => res.data),
     create: (v: Vehiculo) => api.post<Vehiculo>('/vehiculos', v).then(res => res.data),
     delete: (dominio: string) => api.delete(`/vehiculos/${dominio}`),
+};
+
+export const OpcionesService = {
+    getProgramas: () =>
+        api.get<(Programa | string)[]>('/opciones/programas').then(res => res.data),
+
+    getCategorias: () =>
+        api.get<(Categoria | number)[]>('/opciones/categorias').then(res => res.data),
+
+    getOpcionesPersonal: () =>
+        api.get<OpcionesPersonalDTO>('/opciones/personal').then(res => res.data),
 };

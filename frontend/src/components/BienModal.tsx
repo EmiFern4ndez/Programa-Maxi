@@ -1,6 +1,7 @@
-import {useEffect, useState} from 'react';
-import {BienesService, type BienPatrimonial} from '../services/api';
-import {X} from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { BienesService, type BienPatrimonial } from '../services/api';
+import { BienCreadoModal } from './BienCreadoModal';
+import { X } from 'lucide-react';
 
 interface BienModalProps {
     isOpen: boolean;
@@ -9,7 +10,7 @@ interface BienModalProps {
     bienAEditar?: BienPatrimonial | null;
 }
 
-export function BienModal({isOpen, onClose, onSuccess, bienAEditar}: BienModalProps) {
+export function BienModal({ isOpen, onClose, onSuccess, bienAEditar }: BienModalProps) {
     const [formData, setFormData] = useState<Partial<BienPatrimonial>>({
         numeroInventario: '',
         descripcion: '',
@@ -20,6 +21,7 @@ export function BienModal({isOpen, onClose, onSuccess, bienAEditar}: BienModalPr
     });
 
     const [loading, setLoading] = useState(false);
+    const [bienCreadoExitoso, setBienCreadoExitoso] = useState<BienPatrimonial | null>(null);
 
     useEffect(() => {
         if (bienAEditar) {
@@ -34,6 +36,7 @@ export function BienModal({isOpen, onClose, onSuccess, bienAEditar}: BienModalPr
                 cantidad: 1,
             });
         }
+        setBienCreadoExitoso(null);
     }, [bienAEditar, isOpen]);
 
     if (!isOpen) return null;
@@ -44,14 +47,28 @@ export function BienModal({isOpen, onClose, onSuccess, bienAEditar}: BienModalPr
 
         try {
             if (bienAEditar) {
-                // Petición PUT (Edición)
+                // Modo Edición
                 await BienesService.update(formData.numeroInventario!, formData as BienPatrimonial);
+                onSuccess();
+                onClose();
             } else {
-                // Petición POST (Alta)
-                await BienesService.create(formData as BienPatrimonial);
+                // Modo Alta
+                const respuestaApi = await BienesService.create(formData as BienPatrimonial);
+                onSuccess();
+
+                // Fusión defensiva de datos para garantizar un objeto bien formado
+                const bienParaModal: BienPatrimonial = {
+                    numeroInventario: respuestaApi?.numeroInventario || formData.numeroInventario || 'SIN-INVENTARIO',
+                    descripcion: respuestaApi?.descripcion || formData.descripcion || 'Sin descripción',
+                    marca: respuestaApi?.marca || formData.marca || '',
+                    estado: respuestaApi?.estado || formData.estado || 'BUENO',
+                    importeTotal: respuestaApi?.importeTotal ?? formData.importeTotal ?? 0,
+                    codigoPatrimonial: respuestaApi?.codigoPatrimonial || formData.codigoPatrimonial || '',
+                    cantidad: respuestaApi?.cantidad ?? formData.cantidad ?? 1,
+                };
+
+                setBienCreadoExitoso(bienParaModal);
             }
-            onSuccess();
-            onClose();
         } catch (error) {
             console.error('Error al guardar el bien:', error);
             alert('Ocurrió un error al guardar los datos en el servidor.');
@@ -59,6 +76,19 @@ export function BienModal({isOpen, onClose, onSuccess, bienAEditar}: BienModalPr
             setLoading(false);
         }
     };
+
+    // Si el bien fue creado con éxito, mostramos el modal con los botones de acción
+    if (bienCreadoExitoso) {
+        return (
+            <BienCreadoModal
+                bien={bienCreadoExitoso}
+                onClose={() => {
+                    setBienCreadoExitoso(null);
+                    onClose();
+                }}
+            />
+        );
+    }
 
     return (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
@@ -74,8 +104,7 @@ export function BienModal({isOpen, onClose, onSuccess, bienAEditar}: BienModalPr
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                     <div>
-                        <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">N°
-                            Inventario</label>
+                        <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">N° Inventario</label>
                         <input
                             type="text"
                             required
@@ -128,8 +157,7 @@ export function BienModal({isOpen, onClose, onSuccess, bienAEditar}: BienModalPr
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label
-                                className="block text-xs font-semibold text-slate-600 uppercase mb-1">Cantidad</label>
+                            <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Cantidad</label>
                             <input
                                 type="number"
                                 min="1"
@@ -140,8 +168,7 @@ export function BienModal({isOpen, onClose, onSuccess, bienAEditar}: BienModalPr
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Importe Total
-                                ($)</label>
+                            <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Importe Total ($)</label>
                             <input
                                 type="number"
                                 step="0.01"

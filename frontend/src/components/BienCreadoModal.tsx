@@ -1,50 +1,58 @@
 import { Printer, Download, FileText, CheckCircle2 } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
 import type { BienPatrimonial } from '../services/api';
 
 interface Props {
-    bien: BienPatrimonial;
+    bien: BienPatrimonial | null;
     onClose: () => void;
 }
 
 export function BienCreadoModal({ bien, onClose }: Props) {
+    if (!bien) return null;
+
+    const numInventario = bien.numeroInventario || 'SIN-NUMERO';
+
     const handleImprimirTicket = () => {
         window.print();
     };
 
     const handleDescargar = (formato: 'pdf' | 'word') => {
-        window.open(`http://localhost:8080/api/bienes/${bien.numeroInventario}/reporte/${formato}`, '_blank');
+        window.open(`http://localhost:8080/api/bienes/${numInventario}/reporte/${formato}`, '_blank');
     };
+
+    // QR generado vía URL estándar de imagen (evita errores con hooks de React)
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(numInventario)}`;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
             <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-6 print:shadow-none print:p-0">
 
-                {/* Encabezado (se oculta al imprimir) */}
                 <div className="text-center print:hidden">
                     <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-2" />
                     <h3 className="text-xl font-bold text-slate-800">¡Bien Registrado con Éxito!</h3>
                     <p className="text-sm text-slate-500">Elegí una acción para continuar</p>
                 </div>
 
-                {/* --- TICKET IMPRESO (Lo único que sale en la impresora) --- */}
+                {/* Ticket impreso */}
                 <div id="ticket-print" className="border-2 border-dashed border-slate-300 p-4 rounded-lg bg-slate-50 print:border-black print:bg-white print:w-[80mm] print:h-[50mm]">
                     <div className="text-center font-bold text-xs uppercase tracking-wider mb-2">
                         Parque Industrial Viedma
                     </div>
                     <div className="flex items-center justify-between gap-2">
                         <div className="space-y-1 text-left text-xs">
-                            <p className="font-mono font-bold text-sm">{bien.numeroInventario}</p>
-                            <p className="font-semibold text-slate-700 truncate max-w-[150px]">{bien.descripcion}</p>
+                            <p className="font-mono font-bold text-sm">{numInventario}</p>
+                            <p className="font-semibold text-slate-700 truncate max-w-[150px]">{bien.descripcion || ''}</p>
                             <p className="text-slate-500">Marca: {bien.marca || 'N/A'}</p>
                             <p className="text-[10px] text-slate-400">Pat: {bien.codigoPatrimonial || '-'}</p>
                         </div>
-                        {/* Genera un QR con el ID del inventario */}
-                        <QRCodeSVG value={bien.numeroInventario} size={64} />
+                        <img
+                            src={qrUrl}
+                            alt={`QR ${numInventario}`}
+                            className="w-16 h-16 object-contain"
+                        />
                     </div>
                 </div>
 
-                {/* Botones de Acción (Se ocultan al imprimir) */}
+                {/* Botones de Acción */}
                 <div className="space-y-3 print:hidden">
                     <button
                         onClick={handleImprimirTicket}
