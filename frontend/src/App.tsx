@@ -1,6 +1,8 @@
 import {useState} from 'react';
 import {Sidebar} from './components/Sidebar';
 import {BienesTable} from './components/BienesTable';
+import { PersonalTable } from './components/PersonalTable';
+import { VehiculosTable } from './components/VehiculosTable';
 
 export function App() {
     const [activeTab, setActiveTab] = useState('bienes');
@@ -10,10 +12,8 @@ export function App() {
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab}/>
             <main className="flex-1">
                 {activeTab === 'bienes' && <BienesTable/>}
-                {activeTab === 'personal' &&
-                    <div className="p-8 text-slate-600 font-semibold">Módulo de Personal en desarrollo...</div>}
-                {activeTab === 'vehiculos' &&
-                    <div className="p-8 text-slate-600 font-semibold">Módulo de Vehículos en desarrollo...</div>}
+                {activeTab === 'personal' && <PersonalTable/>}
+                {activeTab === 'vehiculos' && <VehiculosTable />}
             </main>
         </div>
     );

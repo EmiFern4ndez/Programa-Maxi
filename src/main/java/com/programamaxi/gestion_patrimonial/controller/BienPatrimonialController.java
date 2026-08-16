@@ -2,10 +2,13 @@ package com.programamaxi.gestion_patrimonial.controller;
 
 import com.programamaxi.gestion_patrimonial.entity.BienPatrimonial;
 import com.programamaxi.gestion_patrimonial.repository.BienPatrimonialRepository;
+import com.programamaxi.gestion_patrimonial.services.ReporteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -77,5 +80,27 @@ public class BienPatrimonialController {
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return bienRepository.findAll(pageable);
+    }
+
+    @GetMapping("/{inventario}/reporte/pdf")
+    public ResponseEntity<byte[]> descargarPdf(@PathVariable String inventario) throws Exception {
+        BienPatrimonial bien = bienRepository.findById(inventario).orElseThrow();
+        byte[] pdf = ReporteService.generarPdfBien(bien);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Bien_" + inventario + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+
+    @GetMapping("/{inventario}/reporte/word")
+    public ResponseEntity<byte[]> descargarWord(@PathVariable String inventario) throws Exception {
+        BienPatrimonial bien = bienRepository.findById(inventario).orElseThrow();
+        byte[] docx = ReporteService.generarDocxBien(bien);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=Bien_" + inventario + ".docx")
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
+                .body(docx);
     }
 }

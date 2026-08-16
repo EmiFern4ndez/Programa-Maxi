@@ -1,3 +1,4 @@
+// src/services/api.ts
 import axios from 'axios';
 
 export const api = axios.create({
@@ -30,6 +31,12 @@ export interface Personal {
     nombreApellido: string;
     codigoPrograma?: string;
     categoria?: number;
+    bienesACargo?: {
+        numeroInventario: string;
+        descripcion: string;
+        marca?: string;
+        estado?: string;
+    }[];
 }
 
 export interface Vehiculo {

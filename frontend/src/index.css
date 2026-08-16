@@ -10,3 +10,18 @@ body {
     box-sizing: border-box;
     background-color: #f8fafc;
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #ticket-print, #ticket-print * {
+    visibility: visible;
+  }
+  #ticket-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

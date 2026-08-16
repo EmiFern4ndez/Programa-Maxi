@@ -19,7 +19,7 @@ export function Sidebar({activeTab, setActiveTab}: SidebarProps) {
                 <div className="flex items-center gap-3 px-2 py-4 mb-6 border-b border-slate-800">
                     <ShieldCheck className="w-8 h-8 text-blue-400"/>
                     <div>
-                        <h1 className="font-bold text-base leading-tight">ProgramaMax</h1>
+                        <h1 className="font-bold text-base leading-tight">SisMax</h1>
                         <span className="text-xs text-slate-400">Gestión Patrimonial</span>
                     </div>
                 </div>
